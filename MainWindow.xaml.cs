@@ -50,5 +50,10 @@ namespace Capusan_DanielaMaria_Proiect
             Register register = new Register();
             register.Show();
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Donatii donatie = new Donatii();
+        }
     }
 }

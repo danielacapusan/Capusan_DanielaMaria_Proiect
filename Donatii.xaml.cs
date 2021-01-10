@@ -23,7 +23,8 @@ namespace Capusan_DanielaMaria_Proiect
     {
         New, 
         Edit,
-        Nothing
+        Nothing,
+        Delete
     }
     public partial class Donatii: Window
     {
@@ -57,7 +58,6 @@ namespace Capusan_DanielaMaria_Proiect
             txtIdDonatorStocBinding.Path = new PropertyPath("id_donator");
             cantitateTextBox.SetBinding(TextBox.TextProperty, txtCantitateBinding);
             grupaTextBox.SetBinding(TextBox.TextProperty, txtGrupaSanguinaBinding);
-            id_donatorTextBox.SetBinding(TextBox.TextProperty, txtGrupaSanguinaStocBinding);
             termenDatePicker.SetBinding(TextBox.TextProperty, txtIdTermen);
             adresaTextBox.SetBinding(TextBox.TextProperty, txtAdresaBinding);
             data_recoltariiDatePicker.SetBinding(TextBox.TextProperty, txtDataRecoltariiBinding);
@@ -123,7 +123,6 @@ namespace Capusan_DanielaMaria_Proiect
                 donatieViewSource.View.MoveCurrentTo(donatie);
             }
 
-
         }
 
         private void btnAdd_Click(object sender, RoutedEventArgs e)
@@ -167,18 +166,18 @@ namespace Capusan_DanielaMaria_Proiect
 
         private void btnRez_Click(object sender, RoutedEventArgs e)
         {
-            Stoc stoc = new Stoc();
-            try
-            {
-                stoc = (Stoc)stocDataGrid.SelectedItem;
-                em.Stocs.Remove(stoc);
-                em.SaveChanges();
-            }
-            catch (DataException ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            stocViewSource.View.Refresh();
+            action = ActionState.Delete;
+            string tempCantitate = cantitateTextBox.Text.ToString();
+            string tempGrupa = grupaTextBox.Text.ToString();
+            btnTAdd.IsEnabled = false;
+            btnRez.IsEnabled = false;
+            btnSaveS.IsEnabled = true;
+            stocDataGrid.IsEnabled = false;
+            BindingOperations.ClearBinding(cantitateTextBox, TextBox.TextProperty);
+            BindingOperations.ClearBinding(grupaTextBox, TextBox.TextProperty);
+            BindingOperations.ClearBinding(grupaTextBox, TextBox.TextProperty);
+            cantitateTextBox.Text = tempCantitate;
+            grupaTextBox.Text = tempGrupa;
         }
 
 
@@ -215,7 +214,25 @@ namespace Capusan_DanielaMaria_Proiect
 
         private void btnTAdd_Click(object sender, RoutedEventArgs e)
         {
-            Stoc stoc = null;
+            action = ActionState.New;
+            btnAdd.IsEnabled = false;
+            btnRez.IsEnabled = false;
+
+            btnSave.IsEnabled = true;
+            stocDataGrid.IsEnabled = false;
+            cantitateTextBox.IsEnabled = true;
+            termenDatePicker.SelectedDate = DateTime.Now;
+            grupaTextBox.IsEnabled = true;
+            BindingOperations.ClearBinding(cantitateTextBox, TextBox.TextProperty);
+            BindingOperations.ClearBinding(grupaTextBox, TextBox.TextProperty);
+            cantitateTextBox.Text = "";
+            grupaTextBox.Text = "";
+            Keyboard.Focus(cantitateTextBox);
+        }
+
+        private void btnSaveS_Click(object sender, RoutedEventArgs e)
+        {
+            Stoc stoc= null;
             if (action == ActionState.New)
             {
                 try
@@ -223,10 +240,10 @@ namespace Capusan_DanielaMaria_Proiect
                     stoc = new Stoc()
                     {
                         cantitate = int.Parse(cantitateTextBox.Text.Trim()),
-                        grupa = grupa_sanguinaTextBox.Text.Trim(),
-                        termen=DateTime.Now
+                        grupa = grupaTextBox.Text.Trim(),
+                        termen = DateTime.Now,
+                        id_donator =int.Parse(id_donatorTextBox.Text.Trim()),
                     };
-
                     em.Stocs.Add(stoc);
                     stocViewSource.View.Refresh();
                     em.SaveChanges();
@@ -236,6 +253,21 @@ namespace Capusan_DanielaMaria_Proiect
                     MessageBox.Show(ex.Message);
                 }
             }
+            else if (action == ActionState.Delete)
+            { 
+                try
+                {
+                    stoc = (Stoc)stocDataGrid.SelectedItem;
+                    em.Stocs.Remove(stoc);
+                    em.SaveChanges();
+                }
+                catch (DataException ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                stocViewSource.View.Refresh();
+            }
+
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
